@@ -1,0 +1,36 @@
+#include <bitset>
+#include "store.h"
+
+class Processor{
+	private:
+		std::bitset<32> accumulator;
+		std::bitset<32> control_instruction;
+		std::bitset<32> present_instruction;
+
+		std::bitset<5> operand;
+		std::bitset<3> opcode;
+
+		Store *store;
+
+	public:
+		Processor(Store *stPtr);
+
+		//returns integer representation of ci
+		int get_ci();
+
+		//fetch-execute cycle functions
+		void incr_ci();
+		void fetch();
+		void decode();
+		void execute();
+
+		//opcode functions
+		void JMP();
+		void JRP();
+		void LDN();
+		void STO();
+		void SUB();
+		void CMP();
+		void STP();
+
+};
