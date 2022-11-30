@@ -1,4 +1,5 @@
 #include "processor.h"
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -6,7 +7,7 @@ Processor::Processor(Store *stPtr){
 	accumulator.reset();
 	control_instruction.reset();
 	present_instruction.reset();
-
+	stopLamp = false;
 	store = stPtr;
 }
 
@@ -38,7 +39,7 @@ void Processor::decode(){
 	//significant bits in present instruction register
 	//bits 0-4 specify operand, bits 13-15 specify opcode
 	int index[8] = {0,1,2,3,4,13,14,15};
-  
+
 	for(int i = 0; i < 8; i++){
 		if(i >= 0 && i <= 4){
 			operand<<present_instruction[index[i]];
@@ -56,8 +57,8 @@ void Processor::execute(){
 	std::string strOperand = operand.to_string();
 
 	//reverse string
-	std::reverse(strOpcode.begin(), strOpcode.end());
-	std::reverse(strOperand.begin(), strOperand.end());
+	reverse(strOpcode.begin(), strOpcode.end());
+	reverse(strOperand.begin(), strOperand.end());
 
 	//convert string to bitset
 	opcode = std::bitset<3>(strOpcode);
@@ -67,10 +68,49 @@ void Processor::execute(){
 	(this->*opcodes[(int)opcode.to_ulong()])();
 }
 
-void Processor::JMP(){}
-void Processor::JRP(){}
-void Processor::LDN(){}
-void Processor::STO(){}
-void Processor::SUB(){}
-void Processor::CMP(){}
-void Processor::STP(){}
+void Processor::JMP(){
+	control_instruction = store->fetch_line(get_ci());
+}
+void Processor::JRP(){
+	// converts both values to string
+	std::string accVal = control_instruction.to_string();
+	std::string storVal = (store->fetch_line(get_ci())).to_string();
+	// flips for left as most-significant-bit format
+	reverse(accVal.begin(), accVal.end());
+	reverse(storVal.begin(), storVal.end());
+	// carry out the subtraction
+	int result = (std::bitset<32>(accVal)).to_ulong() + (std::bitset<32>(storVal).to_ulong());
+	std::string finalVal = std::bitset<32>(result).to_string();
+	// reverse this to put back into normal format before changing accumulator
+	reverse(finalVal.begin(), finalVal.end());
+	accumulator = std::bitset<32>(finalVal);
+}
+void Processor::LDN(){
+	
+}
+void Processor::STO(){
+	store->set_line(accumulator, get_ci());
+}
+void Processor::SUB(){
+	// converts both values to string
+	std::string accVal = accumulator.to_string();
+	std::string storVal = (store->fetch_line(get_ci())).to_string();
+	// flips for left as most-significant-bit format
+	std::reverse(accVal.begin(), accVal.end());
+	std::reverse(storVal.begin(), storVal.end());
+	// carry out the subtraction
+	int result = (std::bitset<32>(accVal)).to_ulong() - (std::bitset<32>(storVal).to_ulong());
+	std::string finalVal = std::bitset<32>(result).to_string();
+	// reverse this to put back into normal format before changing accumulator
+	std::reverse(finalVal.begin(), finalVal.end());
+	accumulator = std::bitset<32>(finalVal);
+}
+void Processor::CMP(){
+	if(accumulator.to_ulong() < 0)
+	{
+		incr_ci();
+	}
+}
+void Processor::STP(){
+	stopLamp = true;
+}
