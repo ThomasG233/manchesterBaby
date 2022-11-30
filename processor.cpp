@@ -38,7 +38,7 @@ void Processor::decode(){
 	//significant bits in present instruction register
 	//bits 0-4 specify operand, bits 13-15 specify opcode
 	int index[8] = {0,1,2,3,4,13,14,15};
-
+  
 	for(int i = 0; i < 8; i++){
 		if(i >= 0 && i <= 4){
 			operand<<present_instruction[index[i]];
@@ -74,8 +74,3 @@ void Processor::STO(){}
 void Processor::SUB(){}
 void Processor::CMP(){}
 void Processor::STP(){}
-
-
-
-
-
