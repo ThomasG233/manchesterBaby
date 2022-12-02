@@ -7,4 +7,5 @@ class Store{
 	public:
 		Store();
 		std::bitset<32> fetch_line(int line);
+		void set_line(std::bitset<32> newData, int line);
 };

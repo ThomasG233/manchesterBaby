@@ -10,12 +10,14 @@ class Processor{
 		std::bitset<5> operand;
 		std::bitset<3> opcode;
 
+		bool stopLamp;
+
 		Store *store;
 
 		typedef void(Processor::*instructions)();
 		instructions opcodes[8] = {&Processor::JMP, &Processor::JRP, &Processor::LDN, &Processor::STO,
 				&Processor::SUB, &Processor::SUB, &Processor::CMP, &Processor::STP};
-        
+
 	public:
 		Processor(Store *stPtr);
 
