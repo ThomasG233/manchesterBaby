@@ -72,18 +72,38 @@ void Processor::JMP(){
 	control_instruction = store->fetch_line(get_ci());
 }
 void Processor::JRP(){
-	// converts both values to string
-	std::string accVal = control_instruction.to_string();
-	std::string storVal = (store->fetch_line(get_ci())).to_string();
-	// flips for left as most-significant-bit format
-	reverse(accVal.begin(), accVal.end());
-	reverse(storVal.begin(), storVal.end());
-	// carry out the subtraction
-	int result = (std::bitset<32>(accVal)).to_ulong() + (std::bitset<32>(storVal).to_ulong());
-	std::string finalVal = std::bitset<32>(result).to_string();
-	// reverse this to put back into normal format before changing accumulator
-	reverse(finalVal.begin(), finalVal.end());
-	accumulator = std::bitset<32>(finalVal);
+	// converts binary to string format
+	std::string storeVal = (store->fetch_line(get_ci())).to_string();
+	std::string conOperand;
+	std::string storeOperand;
+	// collect operands from binary
+	(control_instruction.to_string()).assign(conOperand, 27, 31);
+	storeVal.assign(storeOperand, 27, 31);
+	// reverse for correct notation
+	reverse(conOperand.begin(), conOperand.end());
+	reverse(storeOperand.begin(), storeOperand.end());
+	// carry out the addition
+	int result = (std::bitset<5>(conOperand).to_ulong()) + (std::bitset<5>(storeOperand).to_ulong());
+	// if value is negative, change negative bit to reflect this
+	std::string resultBitset;
+	if(result < 0)
+	{
+		storeVal[26] = '1';
+		resultBitset = std::bitset<5>(-(result)).to_string();
+	}
+	else
+	{
+		storeVal[26] = '0';
+		resultBitset = std::bitset<5>(result).to_string();
+	}
+	// update the store binary to account for the new operand
+	reverse(resultBitset.begin(), resultBitset.end());
+	for(int i = 0; i < 5; i++)
+	{
+		storeVal[27+i] = resultBitset[i];
+	}
+	// update Ci to new value
+	control_instruction = std::bitset<32>(storeVal);
 }
 void Processor::LDN(){
 	
@@ -92,21 +112,41 @@ void Processor::STO(){
 	store->set_line(accumulator, get_ci());
 }
 void Processor::SUB(){
-	// converts both values to string
-	std::string accVal = accumulator.to_string();
-	std::string storVal = (store->fetch_line(get_ci())).to_string();
-	// flips for left as most-significant-bit format
-	std::reverse(accVal.begin(), accVal.end());
-	std::reverse(storVal.begin(), storVal.end());
-	// carry out the subtraction
-	int result = (std::bitset<32>(accVal)).to_ulong() - (std::bitset<32>(storVal).to_ulong());
-	std::string finalVal = std::bitset<32>(result).to_string();
-	// reverse this to put back into normal format before changing accumulator
-	std::reverse(finalVal.begin(), finalVal.end());
-	accumulator = std::bitset<32>(finalVal);
+	// converts binary to string format
+	std::string storeVal = (store->fetch_line(get_ci())).to_string();
+	std::string accOperand;
+	std::string storeOperand;
+	// collect operands from the store and the accumulator
+	(accumulator.to_string()).assign(accOperand, 27, 31);
+	storeVal.assign(storeOperand, 27, 31);
+	// reverse for correct notation
+	reverse(accOperand.begin(), accOperand.end());
+	reverse(storeOperand.begin(), storeOperand.end());
+	// carry out the subtraction, then convert to bitset
+	int result = (std::bitset<5>(accOperand).to_ulong()) - (std::bitset<5>(storeOperand).to_ulong());
+	std::string resultBitset;
+	if(result < 0)
+	{
+		storeVal[26] = '1';
+		resultBitset = std::bitset<5>(-(result)).to_string();
+	}
+	else
+	{
+		storeVal[26] = '0';
+		resultBitset = std::bitset<5>(result).to_string();
+	}	
+	// update the store binary to account for new operand
+	reverse(resultBitset.begin(), resultBitset.end());
+	for(int i = 0; i < 5; i++)
+	{
+		storeVal[27+i] = resultBitset[i];
+	}
+	// update accumulator to new value
+	accumulator = std::bitset<32>(storeVal);
 }
 void Processor::CMP(){
-	if(accumulator.to_ulong() < 0)
+	// if the number is negative
+	if(accumulator.test(26))
 	{
 		incr_ci();
 	}
