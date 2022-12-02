@@ -1,4 +1,5 @@
 #include <vector>
+#include <fstream>
 #include <bitset>
 
 class Store{
@@ -7,5 +8,6 @@ class Store{
 	public:
 		Store();
 		std::bitset<32> fetch_line(int line);
-		void set_line(std::bitset<32> newData, int line);
+		void set_line(std::bitset<32> acc, int ci);
+		void load_file(std::string file);
 };

@@ -24,6 +24,8 @@ class Processor{
 		//returns integer representation of ci
 		int get_ci();
 
+		bool get_stop();
+
 		//fetch-execute cycle functions
 		void incr_ci();
 		void fetch();

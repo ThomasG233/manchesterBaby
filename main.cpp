@@ -6,9 +6,21 @@ int main(){
 	Store store;
 	Processor processor(&store);
 
-	for(int i = 0; i < 100; i++){
-		std::cout << processor.get_ci() << std::endl;
+	store.load_file("BabyTest1-MC.txt");
+
+	while(!processor.get_stop()){
+
+		std::cout<<"incrementing CI" << std::endl;
 		processor.incr_ci();
+
+		std::cout<<"fetch"<<std::endl;
+		processor.fetch();
+
+		std::cout<<"decode"<<std::endl;
+		processor.decode();
+
+		std::cout<<"execute"<<std::endl;
+		processor.execute();
 	}
 
 	return 0;
