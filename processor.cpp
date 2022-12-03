@@ -7,7 +7,6 @@
 only numbers to be stored and read in 2s complement are numbers stored in accumulator and stored in vars section of the machine code
 	-when reading numbers from store, convert to 2s complement form 
 	-when reading number from accumulator, read based on fact that it is in 2s complement form
-
 	-CI and PI do not need 2s complement as they are simply references to the store
 */
 
@@ -77,49 +76,13 @@ void Processor::execute(){
 
 void Processor::JMP(){
 	//copy contents of store line to CI, contents is the variable stored at the operand
-	control_instruction = store->fetch_line(operand.to_ulong());
+	control_instruction = store->fetch_line((int)operand.to_ulong());
 }
 void Processor::JRP(){
 	//jump relative, add contents of store line to CI
 	//should grab the variable stored at operand and add that to the CI
 	// for example this instruction could jump ahead two lines, JRP 2
-
-	// converts binary to string format
-	std::string storeVal = (store->fetch_line(get_ci())).to_string();
-	std::string conOperand;
-	std::string storeOperand;
-
-	// collect operands from binary
-	(control_instruction.to_string()).assign(conOperand, 27, 31);
-	storeVal.assign(storeOperand, 27, 31);
-
-	// reverse for correct notation
-	reverse(conOperand.begin(), conOperand.end());
-	reverse(storeOperand.begin(), storeOperand.end());
-
-	// carry out the addition
-	int result = (std::bitset<5>(conOperand).to_ulong()) + (std::bitset<5>(storeOperand).to_ulong());
-
-	// if value is negative, change negative bit to reflect this
-	std::string resultBitset;
-	if(result < 0)
-	{
-		storeVal[26] = '1';
-		resultBitset = std::bitset<5>(-(result)).to_string();
-	}
-	else
-	{
-		storeVal[26] = '0';
-		resultBitset = std::bitset<5>(result).to_string();
-	}
-	// update the store binary to account for the new operand
-	reverse(resultBitset.begin(), resultBitset.end());
-	for(int i = 0; i < 5; i++)
-	{
-		storeVal[27+i] = resultBitset[i];
-	}
-	// update Ci to new value
-	control_instruction = std::bitset<32>(storeVal);
+	control_instruction = store->fetch_line(get_ci() + (int)operand.to_ulong());
 }
 void Processor::LDN(){
 	//copy content of store line to accumulator, negated
@@ -134,48 +97,47 @@ void Processor::LDN(){
 void Processor::STO(){
 	//copy content of accumulator to store line - THIS NEEDS FIXED - should point to the variables section of store not the 
 	//instructions part (i.e past the END: bit), should store accumulator to the line pointed to by operand
-	store->set_line(accumulator, get_ci());
+	store->set_line(accumulator, (int)operand.to_ulong());
 }
 void Processor::SUB(){
 	//subtract content of Store line from accumulator
 	//should subtract content at line pointed to by operand from the accumulator
-
-	// converts binary to string format
-	std::string storeVal = (store->fetch_line(get_ci())).to_string();
-	std::string accOperand;
-	std::string storeOperand;
-	// collect operands from the store and the accumulator
-	(accumulator.to_string()).assign(accOperand, 27, 31);
-	storeVal.assign(storeOperand, 27, 31);
-	// reverse for correct notation
-	reverse(accOperand.begin(), accOperand.end());
-	reverse(storeOperand.begin(), storeOperand.end());
-
-	// carry out the subtraction, then convert to bitset
-	int result = (std::bitset<5>(accOperand).to_ulong()) - (std::bitset<5>(storeOperand).to_ulong());
-	std::string resultBitset;
+	int result = 0;
+	int accNum = 0;
+	int storeNum = 0;
+	// grab value of accumulator
+	std::string acc = accumulator.to_string();
+	reverse(acc.begin(), acc.end());
+	// if value on accumulator is negative
+	if(acc[0] == '1')
+	{
+		std::bitset<32> twosCompConversion = accumulator.flip();
+		accNum = ((int)(twosCompConversion.to_ulong()) + 1) * -1;
+	}
+	else // do normal conversion
+	{
+		accNum= (int)((std::bitset<32>(acc)).to_ulong());
+	}
+	// grab value of store location
+	std::string storeValue = (store->fetch_line(operand.to_ulong())).to_string();
+	storeValue = storeValue.assign(storeValue, 27, 5);
+	reverse(storeValue.begin(), storeValue.end());
+	int storeNum = (int)((std::bitset<5>(acc)).to_ulong());
+	// get result
+	result = accNum - storeNum;
+	// set accumulator to new value
 	if(result < 0)
 	{
-		storeVal[26] = '1';
-		resultBitset = std::bitset<5>(-(result)).to_string();
+		accumulator = (std::bitset<32>(-1 * (result - 1))).flip();
 	}
 	else
 	{
-		storeVal[26] = '0';
-		resultBitset = std::bitset<5>(result).to_string();
-	}	
-	// update the store binary to account for new operand
-	reverse(resultBitset.begin(), resultBitset.end());
-	for(int i = 0; i < 5; i++)
-	{
-		storeVal[27+i] = resultBitset[i];
+		accumulator = std::bitset<32>(result);
 	}
-	// update accumulator to new value
-	accumulator = std::bitset<32>(storeVal);
 }
 void Processor::CMP(){
 	// if the number is negative
-	if(accumulator.test(26))
+	if(accumulator.test(31))
 	{
 		incr_ci();
 	}
