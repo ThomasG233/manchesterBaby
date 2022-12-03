@@ -122,7 +122,7 @@ void Processor::SUB(){
 	std::string storeValue = (store->fetch_line(operand.to_ulong())).to_string();
 	storeValue = storeValue.assign(storeValue, 27, 5);
 	reverse(storeValue.begin(), storeValue.end());
-	int storeNum = (int)((std::bitset<5>(acc)).to_ulong());
+	storeNum = (int)((std::bitset<5>(acc)).to_ulong());
 	// get result
 	result = accNum - storeNum;
 	// set accumulator to new value
