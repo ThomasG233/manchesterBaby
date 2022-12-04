@@ -74,34 +74,88 @@ void Processor::execute(){
 	(this->*opcodes[(int)opcode.to_ulong()])();
 }
 
+void Processor::printout(){
+	// print out the status of the machine at this point of the code
+	// NOTE; all of the printouts are in Right-Most-Bit format.
+	std::bitset<32> bits;
+	std::string bitset;
+	// ACCUMULATOR PRINTOUT: For debug purposes
+	std::cout << "A: ";
+	bitset = accumulator.to_string();
+	reverse(bitset.begin(), bitset.end());
+	bits = std::bitset<32>(bitset);
+	// print out each bit, full square for 1, empty for 0
+	for(int j = 0; j < 32; j++)
+	{
+		if(bits.test(j))
+		{
+			std::cout << "■ ";
+		}
+		else
+		{
+			std::cout << "□ ";
+		}
+	}
+	std::cout << "\n" << std::endl;
+	// STORE PRINTOUT:
+	// for each line of the store
+	for(int i = 0; i < 32; i++)
+	{
+		std::cout << i << ": ";
+		// print out in right-most-bit format
+		bitset = (store->fetch_line(i)).to_string();
+		reverse(bitset.begin(),bitset.end());
+		bits = std::bitset<32>(bitset);
+		for(int j = 0; j < store->get_store_size(); j++)
+		{
+			if(bits.test(j))
+			{
+				std::cout << "■ ";
+			}
+			else
+			{
+				std::cout << "□ ";
+			}
+		}
+		std::cout << std::endl;
+	}
+}
+
 void Processor::JMP(){
 	//copy contents of store line to CI, contents is the variable stored at the operand
+	std::cout << "JMP " << operand.to_ulong() << std::endl; 
 	control_instruction = store->fetch_line((int)operand.to_ulong());
 }
 void Processor::JRP(){
 	//jump relative, add contents of store line to CI
 	//should grab the variable stored at operand and add that to the CI
 	// for example this instruction could jump ahead two lines, JRP 2
+	std::cout << "JRP " << operand.to_ulong() << std::endl; 
 	control_instruction = store->fetch_line(get_ci() + (int)operand.to_ulong());
 }
 void Processor::LDN(){
 	//copy content of store line to accumulator, negated
 	//function needs to be finished
-
 	accumulator = store->fetch_line((int)operand.to_ulong());
-
+	std::string value = accumulator.to_string();
+	reverse(value.begin(), value.end());
+	int number = (int)(std::bitset<32>(value)).to_ulong() - 1;
+	value = (std::bitset<32>(number)).to_string();
+	reverse(value.begin(), value.end());
+	accumulator = std::bitset<32>(value);
 	accumulator.flip();
-	accumulator = std::bitset<32>((int)accumulator.to_ulong() + 1);
 
 }
 void Processor::STO(){
 	//copy content of accumulator to store line - THIS NEEDS FIXED - should point to the variables section of store not the 
 	//instructions part (i.e past the END: bit), should store accumulator to the line pointed to by operand
+	std::cout << "STO " << operand.to_ulong() << std::endl;
 	store->set_line(accumulator, (int)operand.to_ulong());
 }
 void Processor::SUB(){
 	//subtract content of Store line from accumulator
 	//should subtract content at line pointed to by operand from the accumulator
+	std::cout << "SUB " << operand.to_ulong() << std::endl;
 	int result = 0;
 	int accNum = 0;
 	int storeNum = 0;
@@ -111,7 +165,8 @@ void Processor::SUB(){
 	// if value on accumulator is negative
 	if(acc[0] == '1')
 	{
-		std::bitset<32> twosCompConversion = accumulator.flip();
+		std::bitset<32> twosCompConversion = accumulator;
+		twosCompConversion.flip();
 		accNum = ((int)(twosCompConversion.to_ulong()) + 1) * -1;
 	}
 	else // do normal conversion
@@ -137,11 +192,13 @@ void Processor::SUB(){
 }
 void Processor::CMP(){
 	// if the number is negative
+	std::cout << "CMP " << std::endl;
 	if(accumulator.test(31))
 	{
 		incr_ci();
 	}
 }
 void Processor::STP(){
+	std::cout << "STP " << std::endl;
 	stopLamp = true;
 }
