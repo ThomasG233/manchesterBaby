@@ -7,7 +7,6 @@ int main(){
 	Processor processor(&store);
 
 	store.load_file("BabyTest1-MC.txt");
-
 	while(!processor.get_stop()){
 
 		std::cout<<"incrementing CI" << std::endl;
@@ -21,8 +20,11 @@ int main(){
 
 		std::cout<<"execute"<<std::endl;
 		processor.execute();
+		
+		std::cout<<"printing"<<std::endl;
+		processor.printout();
 	}
-
+	
 	return 0;
 
 }
