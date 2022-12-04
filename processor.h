@@ -31,6 +31,7 @@ class Processor{
 		void fetch();
 		void decode();
 		void execute();
+		void printout();
 
 		//opcode functions
 		void JMP();
