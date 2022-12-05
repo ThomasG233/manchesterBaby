@@ -3,12 +3,6 @@
 #include <iostream>
 #include <string>
 
-/*
-only numbers to be stored and read in 2s complement are numbers stored in accumulator and stored in vars section of the machine code
-	-when reading numbers from store, convert to 2s complement form 
-	-when reading number from accumulator, read based on fact that it is in 2s complement form
-	-CI and PI do not need 2s complement as they are simply references to the store
-*/
 
 Processor::Processor(Store *stPtr){
 	accumulator.reset();
@@ -23,6 +17,7 @@ int Processor::get_ci(){
 	return (int)control_instruction.to_ulong();
 }
 
+//return state of stopLamp
 bool Processor::get_stop(){
 	return stopLamp;
 }
@@ -96,12 +91,36 @@ void Processor::printout(){
 			std::cout << "□ ";
 		}
 	}
+
+	std::cout << "\n" <<std::endl;
+	std::cout << "C: "; 
+	bitset = control_instruction.to_string();
+	reverse(bitset.begin(), bitset.end());
+	bits = std::bitset<32>(bitset);
+	// print out each bit, full square for 1, empty for 0
+	for(int j = 0; j < 32; j++)
+	{
+		if(bits.test(j))
+		{
+			std::cout << "■ ";
+		}
+		else
+		{
+			std::cout << "□ ";
+		}
+	}
 	std::cout << "\n" << std::endl;
 	// STORE PRINTOUT:
 	// for each line of the store
 	for(int i = 0; i < 32; i++)
 	{
 		std::cout << i << ": ";
+
+		//print extra space to keep all lines in line
+		if(i <= 9){
+			std::cout << " ";
+		}
+
 		// print out in right-most-bit format
 		bitset = (store->fetch_line(i)).to_string();
 		reverse(bitset.begin(),bitset.end());
@@ -121,37 +140,56 @@ void Processor::printout(){
 	}
 }
 
+//OPCODE 000
 void Processor::JMP(){
-	//copy contents of store line to CI, contents is the variable stored at the operand
-	std::cout << "JMP " << operand.to_ulong() << std::endl; 
-	control_instruction = store->fetch_line((int)operand.to_ulong());
+	//jump to line number in operand
+	std::cout << "JMP " << operand.to_ulong() << std::endl;
+	int operand_value = (int)operand.to_ulong(); 
+	control_instruction = std::bitset<32>(operand_value);
 }
+
+//OPCODE 10
 void Processor::JRP(){
 	//jump relative, add contents of store line to CI
-	//should grab the variable stored at operand and add that to the CI
-	// for example this instruction could jump ahead two lines, JRP 2
 	std::cout << "JRP " << operand.to_ulong() << std::endl; 
 	control_instruction = store->fetch_line(get_ci() + (int)operand.to_ulong());
 }
+
+//OPCODE 010
 void Processor::LDN(){
-	//copy content of store line to accumulator, negated
-	//function needs to be finished
+	//copy content of store line to accumulator, negated (2s complement)
+	
+	std::cout << "LDN " << operand.to_ulong() << std::endl;
+
+	//fetch operand line
 	accumulator = store->fetch_line((int)operand.to_ulong());
-	std::string value = accumulator.to_string();
-	reverse(value.begin(), value.end());
-	int number = (int)(std::bitset<32>(value)).to_ulong() - 1;
-	value = (std::bitset<32>(number)).to_string();
-	reverse(value.begin(), value.end());
-	accumulator = std::bitset<32>(value);
+
+	//flip the bits
 	accumulator.flip();
 
+	//reverse
+	std::string value = accumulator.to_string();
+	reverse(value.begin(), value.end());
+	accumulator = std::bitset<32>(value);
+
+	//add 1 to accumulator
+	accumulator = std::bitset<32>(((int)accumulator.to_ulong() + 1));
+
+	//reverse again to maintain big-endian format
+	value = accumulator.to_string();
+	reverse(value.begin(), value.end());
+	accumulator = std::bitset<32>(value);
+
 }
+
+//OPCODE 110
 void Processor::STO(){
-	//copy content of accumulator to store line - THIS NEEDS FIXED - should point to the variables section of store not the 
-	//instructions part (i.e past the END: bit), should store accumulator to the line pointed to by operand
+	//copy content of accumulator to store line
 	std::cout << "STO " << operand.to_ulong() << std::endl;
 	store->set_line(accumulator, (int)operand.to_ulong());
 }
+
+//OPCODE 001 & 101
 void Processor::SUB(){
 	//subtract content of Store line from accumulator
 	//should subtract content at line pointed to by operand from the accumulator
@@ -159,11 +197,14 @@ void Processor::SUB(){
 	int result = 0;
 	int accNum = 0;
 	int storeNum = 0;
-	// grab value of accumulator
+
+	// grab value of accumulator and reverse order of bits
 	std::string acc = accumulator.to_string();
 	reverse(acc.begin(), acc.end());
-	// if value on accumulator is negative
-	if(acc[0] == '1')
+	accumulator = std::bitset<32>(acc);
+
+	// if value on accumulator is negative - convert from 2s complement format to decimal
+	if(acc[31] == '1')
 	{
 		std::bitset<32> twosCompConversion = accumulator;
 		twosCompConversion.flip();
@@ -171,34 +212,61 @@ void Processor::SUB(){
 	}
 	else // do normal conversion
 	{
-		accNum= (int)((std::bitset<32>(acc)).to_ulong());
+		accNum = (int)accumulator.to_ulong();
 	}
+
 	// grab value of store location
 	std::string storeValue = (store->fetch_line(operand.to_ulong())).to_string();
-	storeValue = storeValue.assign(storeValue, 27, 5);
 	reverse(storeValue.begin(), storeValue.end());
-	storeNum = (int)((std::bitset<5>(acc)).to_ulong());
+	storeNum = (int)((std::bitset<32>(storeValue)).to_ulong());
+
 	// get result
 	result = accNum - storeNum;
+
 	// set accumulator to new value
+	//if result is negative, store in 2s complement form
 	if(result < 0)
 	{
-		accumulator = (std::bitset<32>(-1 * (result - 1))).flip();
+		//store positive form of number to accumulator
+		accumulator = std::bitset<32>(result*-1);
+
+		//flip the bits
+		accumulator.flip();
+
+		//add one 
+		accumulator = std::bitset<32>((int)accumulator.to_ulong() + 1);
+
+		//reverse order of bits to maintain big-endianness
+		acc = accumulator.to_string();
+		reverse(acc.begin(), acc.end());
+		accumulator = std::bitset<32>(acc);
+
+
 	}
+	//if result is positive, store normally
 	else
 	{
+		//reverse order of bits to maintain big-endianness and give to accumulator
 		accumulator = std::bitset<32>(result);
+		acc = accumulator.to_string();
+		reverse(acc.begin(), acc.end());
+		accumulator = std::bitset<32>(acc);
 	}
 }
+
+//OPCODE 011
 void Processor::CMP(){
-	// if the number is negative
+	// if the number is negative, skip next instruction
 	std::cout << "CMP " << std::endl;
 	if(accumulator.test(31))
 	{
 		incr_ci();
 	}
 }
+
+//OPCODE 111
 void Processor::STP(){
+	//set stop lamp to true
 	std::cout << "STP " << std::endl;
 	stopLamp = true;
 }
