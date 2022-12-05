@@ -20,9 +20,13 @@ void Store::load_file(std::string file){
 	int count = 0;
 	while(std::getline(mc, line)){
 
-		line.erase(std::remove(line.begin(), line.end(), '\r'), line.cend());
-
+		// line.erase(std::remove(line.begin(), line.end(), '\r'), line.cend());
+		line.assign(line, 0, 32);
 		storage[count] = std::bitset<32>(line);
 		count++;
 	}
+	mc.close();
+}
+int::Store::get_store_size(){
+	return storage.size();
 }
