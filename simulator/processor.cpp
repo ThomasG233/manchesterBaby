@@ -112,7 +112,7 @@ void Processor::printout(){
 	std::cout << "\n" << std::endl;
 	// STORE PRINTOUT:
 	// for each line of the store
-	for(int i = 0; i < 32; i++)
+	for(int i = 0; i < store->get_store_size(); i++)
 	{
 		std::cout << i << ": ";
 
@@ -125,7 +125,7 @@ void Processor::printout(){
 		bitset = (store->fetch_line(i)).to_string();
 		reverse(bitset.begin(),bitset.end());
 		bits = std::bitset<32>(bitset);
-		for(int j = 0; j < store->get_store_size(); j++)
+		for(int j = 0; j < 32; j++)
 		{
 			if(bits.test(j))
 			{
@@ -143,7 +143,7 @@ void Processor::printout(){
 //OPCODE 000
 void Processor::JMP(){
 	//jump to line number in operand
-	std::cout << "JMP " << operand.to_ulong() << std::endl;
+	std::cout << "\nJMP " << operand.to_ulong() << std::endl;
 	int operand_value = (int)operand.to_ulong(); 
 	control_instruction = std::bitset<32>(operand_value);
 }
@@ -151,7 +151,7 @@ void Processor::JMP(){
 //OPCODE 10
 void Processor::JRP(){
 	//jump relative, add contents of store line to CI
-	std::cout << "JRP " << operand.to_ulong() << std::endl; 
+	std::cout << "\nJRP " << operand.to_ulong() << std::endl; 
 	control_instruction = store->fetch_line(get_ci() + (int)operand.to_ulong());
 }
 
@@ -159,7 +159,7 @@ void Processor::JRP(){
 void Processor::LDN(){
 	//copy content of store line to accumulator, negated (2s complement)
 	
-	std::cout << "LDN " << operand.to_ulong() << std::endl;
+	std::cout << "\nLDN " << operand.to_ulong() << std::endl;
 
 	//fetch operand line
 	accumulator = store->fetch_line((int)operand.to_ulong());
@@ -185,7 +185,7 @@ void Processor::LDN(){
 //OPCODE 110
 void Processor::STO(){
 	//copy content of accumulator to store line
-	std::cout << "STO " << operand.to_ulong() << std::endl;
+	std::cout << "\nSTO " << operand.to_ulong() << std::endl;
 	store->set_line(accumulator, (int)operand.to_ulong());
 }
 
@@ -193,7 +193,7 @@ void Processor::STO(){
 void Processor::SUB(){
 	//subtract content of Store line from accumulator
 	//should subtract content at line pointed to by operand from the accumulator
-	std::cout << "SUB " << operand.to_ulong() << std::endl;
+	std::cout << "\nSUB " << operand.to_ulong() << std::endl;
 	int result = 0;
 	int accNum = 0;
 	int storeNum = 0;
@@ -257,7 +257,7 @@ void Processor::SUB(){
 //OPCODE 011
 void Processor::CMP(){
 	// if the number is negative, skip next instruction
-	std::cout << "CMP " << std::endl;
+	std::cout << "\nCMP " << std::endl;
 	if(accumulator.test(31))
 	{
 		incr_ci();
@@ -267,6 +267,6 @@ void Processor::CMP(){
 //OPCODE 111
 void Processor::STP(){
 	//set stop lamp to true
-	std::cout << "STP " << std::endl;
+	std::cout << "\nSTP " << std::endl;
 	stopLamp = true;
 }
