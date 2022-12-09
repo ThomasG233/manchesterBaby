@@ -10,5 +10,6 @@ class Store{
 		std::bitset<32> fetch_line(int line);
 		void set_line(std::bitset<32> acc, int ci);
 		void load_file(std::string file);
+		void resizeStorage(int userSize);
 		int get_store_size();
 };
