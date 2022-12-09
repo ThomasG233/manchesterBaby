@@ -1,12 +1,46 @@
 #include <iostream>
+#include <algorithm>
 #include "processor.h"
 
 
 int main(){
+
+	std::string response = "";
+	// Collect information related to Baby's storage size.
+	std::cout << "By default, the Manchester Baby holds 32 16-bit numbers in its storage. You can choose to extend this if you wish.\nWould you like to extend it? (Y/N): ";
+	std::cin >> response;
 	Store store;
+	// If the user wants to resize the storage.
+	if(response == "Y" || response == "y")
+	{
+		std::cout << "Enter the new amount of lines to have in storage (minimum of 32, maximum of 64): ";
+		std::cin >> response;
+		// Try-catch block, in case of a failure to convert string
+		try
+		{
+			int value = stoi(response);
+			// If the value entered is valid.
+			if(value > 32 && value < 65)
+			{
+				std::cout << "The storage will have " << value << " lines of storage." << std::endl;
+				store.resizeStorage(value);
+			}
+			else
+			{
+				std::cout << "Invalid amount; the storage will remain at its base size of 32 lines." << std::endl;
+			}
+		}
+		catch(...)
+		{
+			std::cout << "Invalid data provided; the storage will remain at its base size of 32 lines." << std::endl;
+		}
+	}
 	Processor processor(&store);
 
-	store.load_file("BabyTest1-MC.txt");
+	std::cout << "Enter the file you wish to read in the machine code from: ";
+	std::cin >> response;
+
+	store.load_file(response);
 	while(!processor.get_stop()){
 
 		//std::cout<<"incrementing CI" << std::endl;
