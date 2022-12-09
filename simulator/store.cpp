@@ -3,6 +3,10 @@
 Store::Store(){
 	storage.resize(32);
 }
+// resizes the storage capacity
+void Store::resizeStorage(int userSize){
+	storage.resize(userSize);
+}
 
 //return line at line
 std::bitset<32> Store::fetch_line(int line){
@@ -32,6 +36,7 @@ void Store::load_file(std::string file){
 	//close file
 	mc.close();
 }
+// return the size of the store
 int::Store::get_store_size(){
 	return storage.size();
 }
