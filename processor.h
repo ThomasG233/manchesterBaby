@@ -24,6 +24,7 @@ class Processor{
 		//returns integer representation of ci
 		int get_ci();
 
+		//returns stopLamp state
 		bool get_stop();
 
 		//fetch-execute cycle functions
