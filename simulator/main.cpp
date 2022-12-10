@@ -2,18 +2,17 @@
 #include <algorithm>
 #include "processor.h"
 
-
 int main(){
 
 	std::string response = "";
 	// Collect information related to Baby's storage size.
-	std::cout << "By default, the Manchester Baby holds 32 16-bit numbers in its storage. You can choose to extend this if you wish.\nWould you like to extend it? (Y/N): ";
+	std::cout << "By default, the Manchester Baby holds 32 32-bit numbers in its storage. You can choose to extend this if you wish.\nWould you like to extend it? (Y/N): ";
 	std::cin >> response;
 	Store store;
 	// If the user wants to resize the storage.
 	if(response == "Y" || response == "y")
 	{
-		std::cout << "Enter the new amount of lines to have in storage (minimum of 32, maximum of 64): ";
+		std::cout << "Enter the new amount of lines to have in storage (minimum of 33, maximum of 64): ";
 		std::cin >> response;
 		// Try-catch block, in case of a failure to convert string
 		try
@@ -35,34 +34,59 @@ int main(){
 			std::cout << "Invalid data provided; the storage will remain at its base size of 32 lines." << std::endl;
 		}
 	}
+
+	
 	Processor processor(&store);
 
 	std::cout << "Enter the file you wish to read in the machine code from: ";
 	std::cin >> response;
 
-	store.load_file(response);
-	while(!processor.get_stop()){
+	int code = store.load_file(response);
 
-		//std::cout<<"incrementing CI" << std::endl;
-		processor.incr_ci();
+	if(code == SUCCESS)
+	{
+		std::cout << "File opened successfully." << std::endl;
 
-		//std::cout<<"fetch"<<std::endl;
-		processor.fetch();
+		while(!processor.get_stop())
+		{
+			//std::cout<<"incrementing CI" << std::endl;
+			processor.incr_ci();
 
-		//std::cout<<"decode"<<std::endl;
-		processor.decode();
+			//std::cout<<"fetch"<<std::endl;
+			processor.fetch();
 
-		//std::cout<<"execute"<<std::endl;
-		processor.execute();
-		
-		//std::cout<<"printing"<<std::endl;
-		processor.printout();
+			//std::cout<<"decode"<<std::endl;
+			processor.decode();
+
+			//std::cout<<"execute"<<std::endl;
+			processor.execute();
+			
+			//std::cout<<"printing"<<std::endl;
+			processor.printout();
+		}
+	}
+	else if(code == EXCEEDED_LENGTH)
+	{
+		std::cout << "Too much machine code provided, exceeded the size of the store." << std::endl;
+	}
+	else if(code == INVALID_CONTENT)
+	{
+		std::cout << "Invalid file content, must be formatted as machine code." << std::endl;
+	}
+	else if(code == FILE_NOT_FOUND)
+	{
+		std::cout << "The file provided was not found." << std::endl;
+	}
+	else if(code == BITSET_TOO_LONG)
+	{
+		std::cout << "Machine code in file must be provided with a 32-bit length." << std::endl;
 	}
 
-	/*-------- DEBUGGING ------
+	/*
+	-------- DEBUGGING ------
 
 
-	*/
+
 	//printing answer in decimal form
 
 	std::bitset<32> answer = store.fetch_line(9);
@@ -83,6 +107,9 @@ int main(){
 		std::cout << "Answer: " << answer.to_ulong() << std::endl;
 	}
 	
-	return 0;
 
+	*/
+	return 0;
 }
+
+
