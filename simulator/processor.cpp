@@ -1,3 +1,7 @@
+/*
+	Group 8: Jessio Rodrigues, Jake Traynor, Sam Linehan, Ben Buchan, Thomas Gourlay
+*/
+
 #include "processor.h"
 #include <algorithm>
 #include <iostream>
@@ -95,7 +99,6 @@ void Processor::printout(){
 	std::cout << "\n" <<std::endl;
 	std::cout << "C: "; 
 	bitset = control_instruction.to_string();
-	reverse(bitset.begin(), bitset.end());
 	bits = std::bitset<32>(bitset);
 	// print out each bit, full square for 1, empty for 0
 	for(int j = 0; j < 32; j++)
@@ -222,13 +225,13 @@ void Processor::SUB(){
 
 	// get result
 	result = accNum - storeNum;
-
 	// set accumulator to new value
-	//if result is negative, store in 2s complement form
+	// if result is negative, store in 2s complement form
 	if(result < 0)
 	{
+		result *= -1;
 		//store positive form of number to accumulator
-		accumulator = std::bitset<32>(result*-1);
+		accumulator = std::bitset<32>(result);
 
 		//flip the bits
 		accumulator.flip();
@@ -241,17 +244,16 @@ void Processor::SUB(){
 		reverse(acc.begin(), acc.end());
 		accumulator = std::bitset<32>(acc);
 
-
-	}
-	//if result is positive, store normally
-	else
-	{
-		//reverse order of bits to maintain big-endianness and give to accumulator
-		accumulator = std::bitset<32>(result);
-		acc = accumulator.to_string();
-		reverse(acc.begin(), acc.end());
-		accumulator = std::bitset<32>(acc);
-	}
+		}
+		//if result is positive, store normally
+		else
+		{
+			//reverse order of bits to maintain big-endianness and give to accumulator
+			accumulator = std::bitset<32>(result);
+			acc = accumulator.to_string();
+			reverse(acc.begin(), acc.end());
+			accumulator = std::bitset<32>(acc);
+		}
 }
 
 //OPCODE 011
