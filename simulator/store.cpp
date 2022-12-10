@@ -1,4 +1,5 @@
 #include "store.h"
+#include <iostream>
 
 Store::Store(){
 	storage.resize(32);
@@ -19,22 +20,77 @@ void Store::set_line(std::bitset<32> acc, int ci){
 }
 
 //load machine code into store
-void Store::load_file(std::string file){
+int Store::load_file(std::string file){
 	//open file
-	std::ifstream mc;
-	mc.open(file);
+	std::ifstream input;
+	int memorySize = storage.size();
+	input.open(file);
 
-	//every line is set as bitset in store vector (up to a max of 32 lines)
-	std::string line;
-	int count = 0;
-	while(std::getline(mc, line)){
-		line.assign(line, 0, 32);
-		storage[count] = std::bitset<32>(line);
-		count++;
+	if(input.is_open())  //check if the file can be opened
+	{
+		std::string line;
+		bool fileRight = true;
+		int lineCount = 0;
+		int lineSize = 0;
+
+		while(getline(input,line) && fileRight == true)
+		{
+			lineSize = line.length();
+			int numberCount = 0;
+			if(lineCount > memorySize)
+			{
+				fileRight = false;
+			}
+
+			if(lineSize != 32) // if file doesnt contain a line that does not equal 32 bits 
+			{
+				fileRight = false;
+			}
+			else
+			{
+
+				for(int i = 0; i < lineSize; i++)
+				{
+					if(lineCount < memorySize)
+					{
+						if(line[i] == '0' || line[i] == '1')
+						{
+							numberCount++;
+						}
+						else
+						{
+							fileRight = false;
+						}
+					}
+				}
+			}
+			if(fileRight == true)
+			{
+				line.assign(line, 0, 32);
+				storage[lineCount] = std::bitset<32>(line);
+				lineCount++;
+			}
+		}
+		input.close();
+
+		if(lineCount > memorySize)
+		{ 
+			return EXCEEDED_LENGTH;
+		}
+		if(lineSize != 32)
+		{
+			return BITSET_TOO_LONG;
+		}
+		if(fileRight == false)
+		{
+			return INVALID_CONTENT;
+		}
+		return SUCCESS;
 	}
-
-	//close file
-	mc.close();
+	else 
+	{
+		return FILE_NOT_FOUND;
+	}
 }
 // return the size of the store
 int::Store::get_store_size(){
