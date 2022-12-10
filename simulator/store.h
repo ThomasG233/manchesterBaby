@@ -1,6 +1,11 @@
+/*
+	Group 8: Jessio Rodrigues, Jake Traynor, Sam Linehan, Ben Buchan, Thomas Gourlay
+*/
+
 #include <vector>
 #include <fstream>
 #include <bitset>
+
 
 // error codes to be returned for file reading
 const int SUCCESS = 0;
