@@ -1,5 +1,8 @@
+/*
+	Group 8: Jessio Rodrigues, Jake Traynor, Sam Linehan, Ben Buchan, Thomas Gourlay
+*/
+
 #include "store.h"
-#include <iostream>
 
 Store::Store(){
 	storage.resize(32);
