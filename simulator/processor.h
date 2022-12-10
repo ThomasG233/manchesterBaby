@@ -1,5 +1,10 @@
+/*
+	Group 8: Jessio Rodrigues, Jake Traynor, Sam Linehan, Ben Buchan, Thomas Gourlay
+*/
+
 #include <bitset>
 #include "store.h"
+
 
 class Processor{
 	private:
