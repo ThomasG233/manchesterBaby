@@ -1,4 +1,8 @@
-//Manchester Baby Simulator assembler
+/*
+	Group 8: Jessio Rodrigues, Jake Traynor, Sam Linehan, Ben Buchan, Thomas Gourlay
+*/
+// Manchester Baby assembler
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -180,38 +184,6 @@ void firstPass(vector<string> workedFile)
 	}
 	cout << "Output file saved" << endl;
 }
-
-/*
-Use if statements to determine instruction in first pass
-if (workedFile[i].find("LDN") != string::npos)
-			{
-				instruction = "LDN";
-			}
-			else if (workedFile[i].find("SUB") != string::npos)
-			{
-				instruction = "SUB";
-			}
-			else if (workedFile[i].find("STO") != string::npos)
-			{
-				instruction = "STO";
-			}
-			else if (workedFile[i].find("STP") != string::npos)
-			{
-				instruction = "STP";
-			}
-			else if (workedFile[i].find("CMP") != string::npos)
-			{
-				instruction = "CMP";
-			}
-			else if (workedFile[i].find("JMP") != string::npos)
-			{
-				instruction = "JMP";
-			}
-			else if (workedFile[i].find("JRP") != string::npos)
-			{
-				instruction = "JRP";
-			}
-*/
 
 //Main method
 int main()
