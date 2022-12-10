@@ -99,7 +99,7 @@ void firstPass(vector<string> workedFile)
 	string address = "$";
 	int addressCounter = 0;
 	//Iterate through the worked file
-	for (int i = 0; i < workedFile.size(); i++)
+	for (int i = 0; i < ((int)workedFile.size()); i++)
 	{
 		//Check if the line is a label
 		if (workedFile[i].find(":") != string::npos && workedFile[i].find("VAR") == string::npos)
@@ -112,7 +112,7 @@ void firstPass(vector<string> workedFile)
 		//Check if the line is an instruction
 		if (workedFile[i].find("LDN") != string::npos || workedFile[i].find("SUB") != string::npos || workedFile[i].find("STO") != string::npos || workedFile[i].find("STP") != string::npos || workedFile[i].find("CMP") != string::npos || workedFile[i].find("JMP") != string::npos || workedFile[i].find("JRP") != string::npos)
 		{
-			//Get the instruction (There's a commented out snippet depending on if we want to do an if check here as more accurate later in the code?)
+			//Get the instruction (There's a commented ot snippet depending on if we want to do an if check here as more accurate later in the code?)u
 			string instruction = workedFile[i].substr(workedFile[i].find(":") + 1, 3);
 			//Get the operand
 			string operand = workedFile[i].substr(workedFile[i].find(":") + 4, workedFile[i].length());
@@ -224,8 +224,11 @@ int main()
 	vector<string> workedFile;
 	//Create vector to hold binary file (archaic?)
 	//vector<string> binaryFile;
-	//Clean file
-	cleanFile("input.txt", workedFile);
+	//Use user input to get file name
+	string fileName;
+	cout << "Enter file name: ";
+	cin >> fileName;
+	cleanFile(fileName, workedFile);
 	//Convert to binary
 	firstPass(workedFile);
 	return 0;
